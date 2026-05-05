@@ -1,0 +1,15 @@
+# Services exportés — DIVA (jakhar.aseem.diva)
+
+## Résultat de la commande
+```
+dz> run app.service.info -a jakhar.aseem.diva
+Attempting to run shell module
+Package: jakhar.aseem.diva
+  No exported services.
+```
+
+## Analyse
+
+**Aucun service exporté** n'a été détecté dans l'application DIVA. Ce composant ne présente pas de surface d'attaque via les services Android.
+
+> ✅ **Résultat positif** : L'absence de services exportés réduit la surface d'attaque sur ce vecteur.

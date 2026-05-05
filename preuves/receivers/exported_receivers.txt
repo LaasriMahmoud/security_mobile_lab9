@@ -1,0 +1,15 @@
+# Broadcast Receivers exportés — DIVA (jakhar.aseem.diva)
+
+## Résultat de la commande
+```
+dz> run app.broadcast.info -a jakhar.aseem.diva
+Attempting to run shell module
+Package: jakhar.aseem.diva
+  No exported broadcast receivers.
+```
+
+## Analyse
+
+**Aucun broadcast receiver exporté** n'a été détecté dans l'application DIVA.
+
+> ✅ **Résultat positif** : L'absence de receivers exportés réduit le risque de déclenchement d'actions non autorisées via des intents malveillants.

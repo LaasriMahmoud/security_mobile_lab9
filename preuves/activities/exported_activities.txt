@@ -1,0 +1,32 @@
+# Activities exportées — DIVA (jakhar.aseem.diva)
+
+## Résultat de la commande
+```
+dz> run app.activity.info -a jakhar.aseem.diva
+Attempting to run shell module
+Package: jakhar.aseem.diva
+  jakhar.aseem.diva.MainActivity
+    Permission: null
+  jakhar.aseem.diva.APICredsActivity
+    Permission: null
+  jakhar.aseem.diva.APICreds2Activity
+    Permission: null
+```
+
+## Composants identifiés
+
+| Activité | Exportée | Permission | Intent-Filter |
+|----------|----------|------------|---------------|
+| `MainActivity` | Oui | **Aucune** | `android.intent.action.MAIN` / `LAUNCHER` |
+| `APICredsActivity` | Oui | **Aucune** | `jakhar.aseem.diva.action.VIEW_CREDS` |
+| `APICreds2Activity` | Oui | **Aucune** | `jakhar.aseem.diva.action.VIEW_CREDS2` |
+
+## Risques identifiés
+
+### APICredsActivity & APICreds2Activity
+- **Criticité** : Critique
+- **Scénario** : Une application malveillante peut lancer directement ces activités via un intent implicite correspondant aux actions `VIEW_CREDS` et `VIEW_CREDS2`, exposant des identifiants API hardcodés sans aucune authentification préalable.
+- **Commande d'exploitation possible** :
+  ```
+  dz> run app.activity.start --component jakhar.aseem.diva jakhar.aseem.diva.APICredsActivity
+  ```

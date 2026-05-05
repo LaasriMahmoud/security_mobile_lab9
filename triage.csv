@@ -1,0 +1,9 @@
+ID,Composant,Vulnérabilité,Confiance,Sévérité,Impact,Recommandation,Statut
+V1,MainActivity,Activité exportée sans permission (android.intent.action.MAIN),Élevée,Élevée,Accès direct à l'activité principale sans contrôle d'accès,Ajouter exported=false si non nécessaire ou restreindre avec une permission,À corriger
+V2,APICredsActivity,Activité exportée avec intent-filter VIEW_CREDS sans permission,Élevée,Critique,Exposition de credentials API à toute application tierce,Définir exported=false ou ajouter android:permission de niveau signature,À corriger
+V3,APICreds2Activity,Activité exportée avec intent-filter VIEW_CREDS2 sans permission,Élevée,Critique,Exposition secondaire de credentials API sans aucune protection,Définir exported=false ou ajouter android:permission de niveau signature,À corriger
+V4,NotesProvider,Content Provider exporté sans permission de lecture/écriture (Read/Write: null),Élevée,Critique,Accès libre aux notes internes via content://jakhar.aseem.diva.provider.notesprovider/notes,Ajouter android:readPermission et android:writePermission au niveau signature,À corriger
+V5,Application,Attribut debuggable=true dans le manifeste,Élevée,Élevée,Permet le débogage de l'application en production (extraction mémoire/données),Définir android:debuggable=false pour les builds de production,À corriger
+V6,Application,allowBackup=true dans le manifeste,Moyenne,Moyenne,Les données de l'application peuvent être sauvegardées et extraites via ADB,Définir android:allowBackup=false,À corriger
+V7,Application,minSdkVersion=15 (Android 4.0),Élevée,Moyenne,Exposition à de nombreuses vulnérabilités connues des anciennes versions Android,Relever minSdkVersion à 26 minimum,À surveiller
+V8,Application,Permissions WRITE/READ_EXTERNAL_STORAGE déclarées,Moyenne,Faible,Accès large au stockage externe pouvant exposer des données utilisateur,Utiliser le stockage interne ou les API scoped storage,À surveiller

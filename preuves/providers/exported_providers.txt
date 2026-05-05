@@ -1,0 +1,48 @@
+# Content Providers exportés — DIVA (jakhar.aseem.diva)
+
+## Résultat de la commande
+```
+dz> run app.provider.info -a jakhar.aseem.diva
+Attempting to run shell module
+Package: jakhar.aseem.diva
+  Authority: jakhar.aseem.diva.provider.notesprovider
+    Read Permission:  null
+    Write Permission: null
+    Content Provider: jakhar.aseem.diva.NotesProvider
+    Multiprocess Allowed: False
+    Grant Uri Permissions: False
+```
+
+## URIs accessibles (scanner.provider.finduris)
+```
+dz> run scanner.provider.finduris -a jakhar.aseem.diva
+Scanning jakhar.aseem.diva...
+Got a response from content Uri:  content://jakhar.aseem.diva.provider.notesprovider/notes
+No response from content URI:     content://jakhar.aseem.diva.provider.notesprovider/
+Got a response from content Uri:  content://jakhar.aseem.diva.provider.notesprovider/notes/
+No response from content URI:     content://jakhar.aseem.diva.provider.notesprovider
+
+For sure accessible content URIs:
+  content://jakhar.aseem.diva.provider.notesprovider/notes
+  content://jakhar.aseem.diva.provider.notesprovider/notes/
+```
+
+## URIs référencées (app.provider.finduri)
+```
+dz> run app.provider.finduri jakhar.aseem.diva
+Scanning jakhar.aseem.diva...
+content://jakhar.aseem.diva.provider.notesprovider/notes
+content://jakhar.aseem.diva.provider.notesprovider/
+content://jakhar.aseem.diva.provider.notesprovider/notes/
+content://jakhar.aseem.diva.provider.notesprovider
+```
+
+## Composant identifié
+
+| Provider | Authority | Read Permission | Write Permission | Exporté |
+|----------|-----------|-----------------|------------------|---------|
+| `NotesProvider` | `jakhar.aseem.diva.provider.notesprovider` | **null** | **null** | **Oui** |
+
+## ⚠️ Vulnérabilité Critique
+
+Les deux URIs `content://jakhar.aseem.diva.provider.notesprovider/notes` et `/notes/` sont **confirmées accessibles sans aucune permission**. N'importe quelle application installée sur l'appareil peut lire et écrire les données de notes de l'utilisateur.
