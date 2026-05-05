@@ -1,153 +1,103 @@
-# 🛡️ Lab 9 : Audit de Sécurité Android avec Drozer
+# 🛡️ Lab 9 : Audit de Sécurité Android Approfondi avec Drozer
 
 ## 📋 Présentation du Projet
-Ce laboratoire est dédié à l'analyse de la surface d'attaque d'une application Android vulnérable (**DIVA - Damn Insecure and Vulnerable App**) en utilisant **Drozer**, l'outil de référence pour l'audit de sécurité des applications Android. L'objectif est d'identifier les composants exposés (Activities, Services, Broadcast Receivers, Content Providers) et d'évaluer les risques associés selon les standards **OWASP MASVS**.
+Ce laboratoire constitue une étude de cas pratique sur l'analyse de la surface d'attaque d'une application Android. Nous utilisons **Drozer**, un framework de test de sécurité robuste, pour auditer l'application **DIVA (Damn Insecure and Vulnerable App)**. 
+
+L'audit se concentre sur l'exploitation des mauvaises configurations des composants inter-processus (IPC) d'Android, qui sont souvent le maillon faible de la sécurité mobile.
 
 ---
 
-## 🎯 Objectifs Pédagogiques
-*   Maîtriser l'utilisation de **Drozer** pour l'analyse dynamique.
-*   Identifier les composants Android exposés et leurs vulnérabilités.
-*   Évaluer les risques de sécurité liés aux mauvaises configurations.
-*   Proposer des remédiations conformes aux standards **OWASP MASVS**.
+## 🎯 Objectifs Pédagogiques Détaillés
+*   **Compréhension du Modèle de Sécurité Android** : Analyse du système de permissions et de l'isolation des applications (Sandbox).
+*   **Maîtrise de Drozer** : Utilisation du modèle Client-Serveur (Console sur PC vs Agent sur Émulateur).
+*   **Évaluation des Risques IPC** : Comprendre comment les Intentions (Intents) peuvent être détournées pour accéder à des données privées.
+*   **Conformité OWASP** : Appliquer les standards industriels **MASVS** (Mobile Application Security Verification Standard).
 
 ---
 
-## 🛠️ Configuration de l'Environnement
+## 🛠️ Architecture du Lab et Configuration
 
-### Étape 1 : Préparation et Connexion
-Vérification des outils et installation de l'agent Drozer sur l'émulateur.
+### Le Fonctionnement de Drozer
+Drozer fonctionne via un agent installé sur le terminal Android qui agit comme une application "privilégiée" capable d'interagir avec les autres packages du système. La console sur la machine hôte envoie des commandes à cet agent pour interroger les APIs Android.
 
 ![Vérification ADB et Drozer](1.png)
-*Figure 1 : Vérification de l'installation d'ADB et Drozer sur la machine hôte.*
+*Figure 1 : Initialisation de l'environnement. ADB est le pont de communication, et Drozer est le moteur d'analyse.*
 
 ![Installation Drozer Agent](2.png)
-*Figure 2 : Installation de l'agent Drozer sur l'émulateur via ADB.*
+*Figure 2 : Déploiement de l'agent. Cette étape est cruciale car l'agent servira de relais pour toutes nos requêtes d'audit.*
 
 ![Activation Drozer Agent](3.png)
-*Figure 3 : Activation de l'Embedded Server sur l'agent Drozer.*
+*Figure 3 : L'agent doit écouter sur le port 31415. C'est ici que nous activons le serveur embarqué.*
 
 ![Port Forwarding](4.png)
-*Figure 4 : Configuration du port forwarding pour permettre la communication.*
+*Figure 4 : Le "Port Forwarding" redirige le trafic réseau de votre PC vers l'émulateur, permettant à la console Drozer de "voir" l'agent.*
 
 ---
 
-## 🔍 Analyse de la Surface d'Attaque
+## 🔍 Exploration Technique de l'Application
 
-### Étape 2 : Connexion à la Console
-Connexion réussie entre la machine hôte et l'agent Drozer.
+### Connexion et Reconnaissance
+La première étape consiste à établir le canal de communication et à identifier notre cible.
 
 ![Connexion Drozer](5.png)
-*Figure 5 : Lancement de la console Drozer et connexion à l'appareil.*
-
-![Liste des Modules](6.png)
-*Figure 6 : Exploration des modules Drozer disponibles pour l'audit.*
-
-### Étape 3 : Cartographie des Composants
-Identification du package cible `jakhar.aseem.diva` et de ses composants.
-
-![Liste des Packages](7.png)
-*Figure 7 : Liste de toutes les applications installées sur l'émulateur.*
-
-![Filtrage Package](8.png)
-*Figure 8 : Localisation précise de l'application DIVA.*
+*Figure 5 : Connexion établie. Drozer récupère les informations de base du système Android.*
 
 ![Infos Package](9.png)
-*Figure 9 : Informations détaillées sur le package (Permissions, Chemins, etc.).*
+*Figure 9 : Analyse statique via Drozer. On observe les permissions demandées. Notez la présence de `WRITE_EXTERNAL_STORAGE`, ce qui indique que l'app écrit potentiellement des données sur la carte SD, un emplacement non sécurisé.*
 
-#### 📱 Analyse des Activities
-![Activities Exportées](10.png)
-*Figure 10 : Identification des activités exportées sans protection.*
+### 📂 Focus sur les Content Providers (Vecteur Critique)
+Les Content Providers sont utilisés pour partager des données entre applications. S'ils sont mal configurés, ils deviennent des portes ouvertes.
 
-#### ⚙️ Analyse des Services
-![Services Exportés](11.png)
-*Figure 11 : Vérification des services (Aucun service exporté détecté).*
-
-#### 📂 Analyse des Content Providers
 ![Providers Exportés](12.png)
-*Figure 12 : Découverte d'un Content Provider critique exposé sans permission.*
-
----
-
-## 🛡️ Analyse des Protections et Manifeste
-
-### Étape 4 : Inspection du Manifeste et des URIs
-Analyse approfondie du fichier `AndroidManifest.xml` et test d'accessibilité des URIs.
-
-![Manifeste Android](13.png)
-*Figure 13 : Extraction et analyse du manifeste de l'application.*
-
-![Intent Filters](14.png)
-*Figure 14 : Examen des intent-filters pour comprendre comment les activités sont déclenchées.*
+*Figure 12 : On découvre que `NotesProvider` est `exported=true`. Sans permissions définies (`null`), n'importe quelle application malveillante peut agir comme une application "amie" et lire vos notes.*
 
 ![Scanner URIs](15.png)
-*Figure 15 : Scan automatique des URIs accessibles sans permissions.*
-
-![Find URIs](16.png)
-*Figure 16 : Confirmation de l'accessibilité des données sensibles via le Provider.*
+*Figure 15 : Le scanner Drozer tente de deviner les chemins (URIs). Il confirme que `/notes` renvoie des données. C'est une preuve de vulnérabilité directe.*
 
 ---
 
-## 📊 Tableau de Triage des Vulnérabilités
+## ⚠️ Analyse des Risques et Scénarios d'Attaque
 
-| ID | Composant | Vulnérabilité | Sévérité | Impact | Statut |
-|:---|:---|:---|:---|:---|:---|
-| **V1** | `MainActivity` | Exportée sans protection | Élevée | Contournement d'authentification | À corriger |
-| **V2** | `APICredsActivity` | Exposition de credentials via Intent | Critique | Fuite de clés API sensibles | À corriger |
-| **V3** | `NotesProvider` | URI accessible sans permission | Critique | Fuite/Modification de données privées | À corriger |
-| **V4** | Application | `debuggable="true"` | Élevée | Manipulation mémoire et données | À corriger |
-| **V5** | Application | `allowBackup="true"` | Moyenne | Extraction de données via ADB | À corriger |
+### 1. Intent Spoofing (Activités Exportées)
+L'application expose `APICredsActivity`. Un attaquant pourrait créer une application simple qui envoie un Intent pour lancer cette activité. 
+*   **Impact** : L'utilisateur voit soudainement ses clés API à l'écran, ou pire, l'application malveillante récupère ces clés en arrière-plan si l'activité les renvoie dans un résultat.
 
----
+### 2. Fuite de Données via Content Providers
+Le `NotesProvider` ne vérifie pas qui l'appelle.
+*   **Scénario d'attaque** : Une application de "lampe torche" malveillante pourrait faire une requête SQL `SELECT * FROM content://jakhar.aseem.diva.provider.notesprovider/notes` et envoyer tout le contenu de vos notes vers un serveur distant.
 
-## 🗺️ Mapping OWASP MASVS
-
-| ID | Référence MASVS | Description de la Vulnérabilité |
-|:---|:---|:---|
-| **V1/V2** | **MSTG-PLATFORM-1** | L'application ne doit exposer que les composants nécessaires. |
-| **V3** | **MSTG-STORAGE-2** | Aucune donnée sensible ne doit être stockée sans protection adéquate. |
-| **V4** | **MSTG-RESILIENCE-1** | L'application ne doit pas être exécutable avec des outils de débogage. |
-| **V5** | **MSTG-STORAGE-1** | Protection contre l'extraction de données via les sauvegardes système. |
+### 3. Risques du Flag `debuggable="true"`
+Ce flag permet à un auditeur (ou un attaquant) d'utiliser `jdb` (Java Debugger) pour s'attacher au processus de l'application.
+*   **Risque** : Cela permet d'extraire des variables en mémoire, de modifier le comportement de l'app en temps réel et de contourner les vérifications de sécurité.
 
 ---
 
-## 🛠️ Remédiations Préconisées
+## 📊 Tableau de Triage et Priorisation
 
-### 1. Sécurisation des Activities
-Désactiver l'exportation pour toutes les activités qui ne sont pas des points d'entrée principaux.
-```xml
-<!-- Avant -->
-<activity android:name=".APICredsActivity" android:exported="true" />
-
-<!-- Après -->
-<activity android:name=".APICredsActivity" android:exported="false" />
-```
-
-### 2. Protection du Content Provider
-Ajouter des permissions de lecture/écriture de niveau `signature`.
-```xml
-<provider
-    android:name=".NotesProvider"
-    android:authorities="jakhar.aseem.diva.provider.notesprovider"
-    android:exported="true"
-    android:readPermission="com.diva.permission.READ_NOTES"
-    android:writePermission="com.diva.permission.WRITE_NOTES" />
-```
-
-### 3. Durcissement du Manifeste
-Désactiver le débogage et le backup en production.
-```xml
-<application
-    android:debuggable="false"
-    android:allowBackup="false"
-    ... >
-```
+| ID | Composant | Vulnérabilité | Sévérité | Justification Technique |
+|:---|:---|:---|:---|:---|
+| **V1** | `NotesProvider` | Permission Read/Write absente | **Critique** | Accès total aux données utilisateur par des tiers. |
+| **V2** | `APICredsActivity` | Activité sensible exportée | **Critique** | Fuite d'identifiants techniques hardcodés. |
+| **V3** | Application | `debuggable="true"` | **Élevée** | Permet l'injection de code et le reverse engineering dynamique. |
+| **V4** | Application | `minSdkVersion=15` | **Moyenne** | Supporte des versions d'Android obsolètes avec des failles Kernel connues. |
 
 ---
 
-## 🏁 Conclusion
-Cet audit via **Drozer** a mis en évidence des failles de configuration majeures dans l'application DIVA. L'exposition non protégée des activités et des providers permet à n'importe quelle application malveillante de subtiliser des informations sensibles. L'application des remédiations proposées permettrait d'atteindre un niveau de sécurité conforme aux exigences de l'**OWASP MASVS**.
+## 🛠️ Remédiations et Bonnes Pratiques (OWASP MASVS)
+
+### Standard MSTG-PLATFORM-1 (Composants)
+**Principe** : Ne jamais exporter un composant sauf si c'est strictement nécessaire pour l'interaction avec d'autres apps de confiance.
+*   **Action** : Mettre `android:exported="false"` par défaut.
+
+### Standard MSTG-STORAGE-2 (Données)
+**Principe** : Les données sensibles doivent être protégées par des permissions de niveau `signature`.
+*   **Action** : Si vous devez partager des données, assurez-vous que seule une application signée avec votre même certificat peut y accéder.
 
 ---
-**Auditeur :** Laasri Mahmoud  
-**Outils :** Drozer, ADB, Émulateur Android (API 29)
+
+## 🏁 Conclusion de l'Audit
+Ce laboratoire démontre que la sécurité Android ne repose pas uniquement sur le code Java, mais aussi grandement sur la **configuration du Manifeste**. L'utilisation de Drozer permet de simuler le comportement d'une application adverse et de fermer les vecteurs d'attaque avant que l'application ne soit publiée.
+
+---
+**Rapport réalisé par :** Laasri Mahmoud  
+**Cadre :** Consultant Sécurité Mobile (Audit Défensif)
